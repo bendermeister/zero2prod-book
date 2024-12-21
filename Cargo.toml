@@ -3,4 +3,10 @@ name = "zero2prod-book"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+path = "src/lib.rs"
+
 [dependencies]
+actix-web = "4"
+reqwest = "0.12.9"
+tokio = {version = "1", features = ["macros", "rt-multi-thread"]}
