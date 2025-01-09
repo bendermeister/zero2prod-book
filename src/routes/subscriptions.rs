@@ -1,9 +1,7 @@
 use actix_web::{web, HttpResponse};
-use sqlx::PgPool;
-#[clippy::allow(unused)]
-use uuid::Uuid;
-#[clippy::allow(unused)]
 use chrono::Utc;
+use sqlx::PgPool;
+use uuid::Uuid;
 
 // TODO: read "Understanding Serde": https://www.joshmcguigan.com/blog/understanding-serde/
 #[derive(serde::Deserialize)]
