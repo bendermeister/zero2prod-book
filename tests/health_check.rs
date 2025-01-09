@@ -1,4 +1,4 @@
-use sqlx::{Connection, PgConnection, PgPool, Executor};
+use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
 use zero2prod_book::configuration::{get_configuration, DatabaseSettings};
@@ -46,9 +46,14 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .await
         .expect("Failed to create testing database");
 
-    let db_pool = PgPool::connect(&config.connection_string()).await.expect("Failed to connect to testing database");
+    let db_pool = PgPool::connect(&config.connection_string())
+        .await
+        .expect("Failed to connect to testing database");
 
-    sqlx::migrate!("./migrations").run(&db_pool).await.expect("Failed to migrate the testing database");
+    sqlx::migrate!("./migrations")
+        .run(&db_pool)
+        .await
+        .expect("Failed to migrate the testing database");
 
     db_pool
 }

@@ -1,6 +1,8 @@
 use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
+#[clippy::allow(unused)]
 use uuid::Uuid;
+#[clippy::allow(unused)]
 use chrono::Utc;
 
 // TODO: read "Understanding Serde": https://www.joshmcguigan.com/blog/understanding-serde/
@@ -10,11 +12,11 @@ pub struct FormData {
     name: String,
 }
 
-pub async fn subscribe(form: web::Form<FormData>, 
+pub async fn subscribe(
+    form: web::Form<FormData>,
     // Web Extractor Data
     pool: web::Data<PgPool>,
-    ) -> HttpResponse {
-
+) -> HttpResponse {
     match sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, name, email, subscribed_at)
@@ -24,7 +26,10 @@ pub async fn subscribe(form: web::Form<FormData>,
         form.name,
         form.email,
         Utc::now(),
-        ).execute(pool.get_ref()).await {
+    )
+    .execute(pool.get_ref())
+    .await
+    {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => {
             println!("Failed to execute query: {}", e);
