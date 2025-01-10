@@ -1,7 +1,32 @@
 use sqlx::{Connection, Executor, PgConnection, PgPool};
+use secrecy::ExposeSecret;
 use std::net::TcpListener;
+use std::sync::LazyLock;
 use uuid::Uuid;
 use zero2prod_book::configuration::{get_configuration, DatabaseSettings};
+use zero2prod_book::telemetry;
+use secrecy::Secret;
+
+static TRACING: LazyLock<()> = LazyLock::new(|| {
+    let default_filter_level = "info";
+    let subscriber_name = "test";
+
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = telemetry::get_subscriber(
+            subscriber_name.into(),
+            default_filter_level.into(),
+            std::io::stdout,
+        );
+        telemetry::init_subscriber(subscriber);
+    } else {
+        let subscriber = telemetry::get_subscriber(
+            subscriber_name.into(),
+            default_filter_level.into(),
+            std::io::sink,
+        );
+        telemetry::init_subscriber(subscriber);
+    }
+});
 
 pub struct TestApp {
     pub address: String,
@@ -10,6 +35,7 @@ pub struct TestApp {
 
 impl TestApp {
     async fn new() -> TestApp {
+        LazyLock::force(&TRACING);
         let listener = TcpListener::bind("localhost:0").expect("could not bind tcp listener");
         let port = listener.local_addr().unwrap().port();
         let mut configuration = get_configuration().expect("Failed to read configuration");
@@ -32,12 +58,12 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
     let maintenance_settings = DatabaseSettings {
         database_name: "postgres".to_string(),
         username: "postgres".to_string(),
-        password: "password".to_string(),
+        password: Secret::new("password".to_string()),
         port: config.port.clone(),
         host: config.host.clone(),
     };
 
-    let mut connection = PgConnection::connect(&maintenance_settings.connection_string())
+    let mut connection = PgConnection::connect(&maintenance_settings.connection_string().expose_secret())
         .await
         .expect("Failed to connect to postgres");
 
@@ -46,7 +72,7 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .await
         .expect("Failed to create testing database");
 
-    let db_pool = PgPool::connect(&config.connection_string())
+    let db_pool = PgPool::connect(&config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to testing database");
 
