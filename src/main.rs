@@ -8,6 +8,7 @@ use zero2prod_book::telemetry;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
+    println!("Hello World");
     let subscriber = telemetry::get_subscriber("zero2prod".into(), "info".into(), std::io::stdout);
     telemetry::init_subscriber(subscriber);
 
