@@ -3,8 +3,8 @@ use secrecy::ExposeSecret;
 use std::net::TcpListener;
 use std::sync::LazyLock;
 use uuid::Uuid;
-use zero2prod_book::configuration::{get_configuration, DatabaseSettings};
-use zero2prod_book::telemetry;
+use zero2prod::configuration::{get_configuration, DatabaseSettings};
+use zero2prod::telemetry;
 use secrecy::Secret;
 
 static TRACING: LazyLock<()> = LazyLock::new(|| {
@@ -43,7 +43,7 @@ impl TestApp {
 
         let db_pool = configure_database(&configuration.database).await;
 
-        let server = zero2prod_book::startup::run(listener, db_pool.clone())
+        let server = zero2prod::startup::run(listener, db_pool.clone())
             .expect("Could not create server");
         tokio::spawn(server);
 

@@ -2,9 +2,9 @@ use sqlx::PgPool;
 use std::net::TcpListener;
 use secrecy::ExposeSecret;
 
-use zero2prod_book::configuration::get_configuration;
-use zero2prod_book::startup;
-use zero2prod_book::telemetry;
+use zero2prod::configuration::get_configuration;
+use zero2prod::startup;
+use zero2prod::telemetry;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
